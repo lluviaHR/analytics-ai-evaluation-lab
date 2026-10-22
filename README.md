@@ -1,27 +1,60 @@
 # Analytics AI Evaluation Lab
 
-**Status:** Design v0.3 · Phase 0 instrument calibration in progress · 21 October 2026  
-**License:** Not yet selected. **Do not assume reuse permissions until a license is added.**
+**Can we trust AI-generated analytics? And how would we know?**
 
-> **Central question:** Which AI models and analytical workflows can be trusted to produce accurate, evidence-backed business insights, under what conditions, with what human oversight, and at what cost?
+Companies are starting to ask AI tools questions about their data, like *“Why did sales go up last month?”* The answers can sound confident even when the calculation is wrong or the explanation isn't supported by evidence.
 
-Analytics AI Evaluation Lab is a proposed, vendor-neutral evaluation environment for AI-powered analytics. It evaluates **configurations**, not model brands in isolation: model/deployment + business context + authorized tools + validation + evidence and review policy. The project aims to show *why* configurations succeed or fail through inspectable SQL, executed results, reference answers and investigation traces.
+**Analytics AI Evaluation Lab is a public research and engineering project testing whether AI-generated analytical answers are accurate, consistent, and backed by verifiable evidence.**
 
-**Principle:** An AI-generated explanation is a hypothesis until evidence supports it.
+**Status:** Phase 0 — building and validating the evaluation setup. No AI models have been scored yet.  
+**Next:** Complete the reference and DuckDB checks, build the deterministic grader, then run the first generated-SQL baseline.  
+**License:** All rights reserved. No open-source license has been granted at this time.
 
-## At a glance
+## The first question I'm testing
 
-**What:** An open-source lab for reproducible, evidence-backed evaluation of AI analytics workflows.
+**When a business metric changes, is it because different kinds of customers showed up, or because the same kinds of customers behaved differently?**
 
-**Status:** Phase 0 instrument calibration underway; no AI model performance results published.
+Imagine a SaaS company's trial-to-paid conversion rate increases. Did more trials come from customer segments that typically convert at higher rates? Did customers within each segment convert more often? Did both happen? Or might the observed movement be ordinary random variation?
 
-**Next:** Complete DuckDB verification, the known-wrong grader suite, and SQL safety tests before Arm A runs.
+These distinctions guide what a team investigates next, though they do not by themselves establish *what caused* the change.
 
-## Current focus
+I create **synthetic datasets (made-up but realistic data)** with deliberately planted patterns and independently calculated answers. That lets me check whether an AI identifies and quantifies the patterns correctly, supports its conclusions, and produces consistent answers.
 
-- **First benchmark:** can an AI analyst attribute a change in a conversion rate to customer mix vs. within-segment behavior, and can the evaluation system detect when it gets that wrong?
-- **Design:** compare three architectures on identical cases: generated SQL, approved analytical tools, and a hybrid. Governed context is held constant.
-- **Status:** Phase 0 (verify the evaluation instrument) in progress. No model has been scored and no performance claims exist.
+## What I'm comparing
+
+Three ways of letting AI analyze company data:
+
+1. **Generated SQL:** AI writes database queries using governed business definitions (agreed-upon rules for calculating metrics).
+2. **Approved analytical tools:** AI uses pre-approved functions whose calculations have already been tested.
+3. **Hybrid:** AI uses approved tools where available and controlled SQL for questions the tools don't cover.
+
+The goal is to learn where each approach succeeds, where it fails, and what it costs. **No approach is presumed best.**
+
+## Why it matters
+
+Teams are deciding how much analytical work to delegate to AI. They need to know when a result is correct, when an explanation is unsupported, and where human review remains necessary.
+
+**They need evidence, not just demos.**
+
+## About the author
+
+I'm a data and analytics leader with 14+ years of experience, including leading Data Science & Analytics at GIPHY. I also work as an advisor. This project brings together my experience in metric governance, data science, analytics engineering, and translating technical findings into business decisions.
+
+## Start exploring
+
+- [Design decisions and tradeoffs](docs/decisions.md) — why we're comparing different analytical architectures.
+- [Conversion benchmark walkthrough](benchmarks/conversion/README.md) — the first test case and how its answers are verified.
+- [Evaluation framework](docs/evaluation-framework.md) — how correctness, evidence, uncertainty and safety will be assessed.
+
+*I'd welcome feedback from analytics and AI practitioners. [Connect with me on LinkedIn](https://www.linkedin.com/in/lluviahernandez).*
+
+---
+
+## Technical design and methodology
+
+**Research question:** Which AI models and analytical workflows can be trusted to produce accurate, evidence-backed business insights, under what conditions, with what human oversight, and at what cost?
+
+This Lab evaluates **configurations**, not model brands alone: deployment, analytical context, authorized tools, validation, evidence and review requirements. Its guiding principle is **an AI-generated explanation remains a hypothesis until evidence supports it.**
 
 ## Who it is for
 
@@ -72,7 +105,7 @@ Later: one injected-revenue-discrepancy investigation with a hidden defect manif
 - [`docs/cost-methodology.md`](docs/cost-methodology.md) — run cost, caching, review time, uncertainty and Pareto/gate-first comparisons.
 - [`docs/decisions.md`](docs/decisions.md) — agreed choices versus open architecture decisions.
 - [`benchmarks/case-001-spec.md`](benchmarks/case-001-spec.md) — net-billed-revenue calibration specification (deferred; not the current first benchmark). Not to be confused with `case_001`-`case_004` in the code, which are conversion fixtures.
-- ``config/tier-policy.example.yaml`` (planned; not yet in repository) — **illustrative policy, not approved certification thresholds**.
+- A task-tier policy configuration may be added later; no qualification thresholds are approved yet.
 
 ## Research transparency
 
@@ -96,3 +129,9 @@ pytest -q
 ```
 
 The exact expected ground truth and case-to-scenario mapping must remain inaccessible to evaluated agents.
+
+## License
+
+This project is publicly available for portfolio, research, and educational visibility.
+
+**All rights reserved.** No open-source license has been granted at this time. Licensing options are under consideration.
