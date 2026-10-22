@@ -3,7 +3,9 @@
 **Status:** Design draft, approved direction with open decisions  
 **Date:** 2026-10-16  
 **Product:** Analytics AI Evaluation Lab  
-**Phase:** Pre-implementation
+**Phase:** Phase 0 instrument calibration (Build 001) · **Revised:** 2026-10-21
+
+> **Amendment 001 (2026-10-21):** the primary experimental factor is now **architecture** (generated SQL, approved tools, hybrid) on a conversion mix-shift benchmark, with governed context held constant and models added in Phase 3. Where sections 6 and 10 conflict with this note, this note governs. See `decisions.md` Amendment 001. The first benchmark uses a single row-level `trials` table; the invoice-based schema in section 5 is deferred.
 
 ## 1. Vision and positioning
 
@@ -52,7 +54,7 @@ Initial proposed three-table calibration model: `customers` (customer_id, segmen
 
 Four candidate systems: **GLM-5.1**, **Qwen3.6-27B** (provisional), **Claude Sonnet 5.5**, **GPT-6.1 Sol**. Exact API IDs, snapshot availability, hosts, model parameters, prices and access paths require verification and freeze before scored evaluation. API-based execution is the leading option; self-hosting is deferred. The terms “ChatGPT” and “Claude” are product/model-family labels, not sufficient identifiers for reproducible runs.
 
-Initial calibration matrix: **four model candidates × two conditions × one question = eight cells**, before repetitions.
+**Revised matrix (2026-10-21):** Phases 0-2 use one model and vary architecture (Arm A generated SQL, Arm B approved tools, Arm C hybrid) with governed context held constant; Phase 3 crosses four models with the three arms. The earlier calibration matrix (four models × two contexts × one question = eight cells) is superseded. The raw and governed context definitions below are retained for a later ablation.
 
 - **Raw schema:** business question plus authorized table/column/schema information, with no governed metric definition supplied.
 - **Governed context:** identical question, schema, permissions and output requirements, plus approved metric definition and relevant modeling documentation; never the hidden answer.
@@ -90,7 +92,7 @@ Cost/performance visuals may plot accuracy with intervals against measured cost,
 
 ## 10. MVP and non-goals
 
-**First engineering vertical slice:** one dataset, one fully specified calibration question, four model candidates, raw vs. governed conditions, reference SQL + independent cross-check, controlled response format, query/evidence capture, deterministic grading where possible, timing, token/price data, basic safety/assumption logging, GitHub documentation and a simple static or minimal interactive results view.
+**First engineering vertical slice (revised 2026-10-21):** one synthetic conversion dataset family, one primary factor (architecture: generated SQL, approved tools, hybrid), one model for Phases 0-2 and four models in Phase 3, governed context held constant, reference SQL + independent cross-check, controlled response format, query/evidence capture, deterministic grading where possible, timing, token/price data, basic safety/assumption logging, GitHub documentation and a simple static or minimal interactive results view.
 
 **First distinctive research extension:** one known injected defect causing a revenue discrepancy (illustratively +8%), its hidden defect manifest and impact, approved diagnostic access, evaluated investigations and complete evidence traces.
 

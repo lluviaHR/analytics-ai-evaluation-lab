@@ -7,3 +7,10 @@ __pycache__/
 .env.*
 data/generated/
 *.duckdb
+
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
+
+# Private reference answers and manifests
+data/private/

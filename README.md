@@ -1,6 +1,6 @@
 # Analytics AI Evaluation Lab
 
-**Status:** Design v0.2 · pre-implementation · 16 October 2026  
+**Status:** Design v0.3 · Phase 0 instrument calibration in progress · 21 October 2026  
 **License:** Not yet selected. **Do not assume reuse permissions until a license is added.**
 
 > **Central question:** Which AI models and analytical workflows can be trusted to produce accurate, evidence-backed business insights, under what conditions, with what human oversight, and at what cost?
@@ -8,6 +8,20 @@
 Analytics AI Evaluation Lab is a proposed, vendor-neutral evaluation environment for AI-powered analytics. It evaluates **configurations**, not model brands in isolation: model/deployment + business context + authorized tools + validation + evidence and review policy. The project aims to show *why* configurations succeed or fail through inspectable SQL, executed results, reference answers and investigation traces.
 
 **Principle:** An AI-generated explanation is a hypothesis until evidence supports it.
+
+## At a glance
+
+**What:** An open-source lab for reproducible, evidence-backed evaluation of AI analytics workflows.
+
+**Status:** Phase 0 instrument calibration underway; no AI model performance results published.
+
+**Next:** Complete DuckDB verification, the known-wrong grader suite, and SQL safety tests before Arm A runs.
+
+## Current focus
+
+- **First benchmark:** can an AI analyst attribute a change in a conversion rate to customer mix vs. within-segment behavior, and can the evaluation system detect when it gets that wrong?
+- **Design:** compare three architectures on identical cases: generated SQL, approved analytical tools, and a hybrid. Governed context is held constant.
+- **Status:** Phase 0 (verify the evaluation instrument) in progress. No model has been scored and no performance claims exist.
 
 ## Who it is for
 
@@ -19,10 +33,11 @@ Analytics AI Evaluation Lab is a proposed, vendor-neutral evaluation environment
 2. **Evidence-based investigation:** injected discrepancies, diagnostic SQL, verified vs. hypothetical causes, misleading decoys and reviewable evidence.
 3. **Trust lens applied to both:** confidently wrong claims, evidence integrity, security, repeatability, latency, cost and human oversight.
 
-## Two release stories
+## Planned public releases
 
-- **Release 01 — Engineering foundation:** “Here's how we built and verified our evaluation framework.” A small calibration case demonstrates that the evaluation machinery works; it is **not** a model leaderboard.
-- **Release 02 — Investigation research:** “We tested whether AI could identify the real cause of a revenue discrepancy. Here's what happened, what the models got wrong, and what the evidence showed.” First substantial case study, with appropriately limited claims.
+- **Release 01 — Engineering foundation:** “Here's how we built and verified our evaluation framework.” Phase 0 verifies the conversion-decomposition dataset, reference computations, and grader; it is **not** a model leaderboard.
+- **Release 02 — Architecture comparison:** “We tested whether AI could distinguish customer-mix shifts from within-segment changes using generated SQL, approved tools, and a hybrid. Here is what worked, what failed, and what the evidence showed.” Start with Arm A, then compare A/B/C on matched cases; include uncovered exploratory questions.
+- **Later investigation study:** “We tested whether AI could identify the real cause of a revenue discrepancy. Here's what happened, what the models got wrong, and what the evidence showed.” The seeded revenue incident is retained but is not the first architecture study.
 
 ## Initial model candidates
 
@@ -37,11 +52,16 @@ Four **selected candidates**, pending API availability, exact pinned deployment 
 
 **These names are research selections, not claims of verified API IDs, current availability, prices, or comparable default reasoning settings.** Record the exact API response/deployment metadata and date before any scored run. Do not use auto-updating `latest` aliases for confirmatory campaigns.
 
-## Initial engineering MVP
+## Planned execution (revised 21 October 2026)
 
-One synthetic business dataset, **one calibration question × four models × two context conditions** (raw schema and governed semantic documentation), eight experimental cells before repetitions. Use a common structured SQL-output protocol as a *candidate*, not yet a decision. Independently validate reference SQL (e.g., hand-checked fixture + second calculation path). Store all attempts and evidence. Early comparisons are descriptive: **one case cannot rank models or qualify trust**.
+- **Phase 0 — Verify the evaluation instrument.** No model required, a handful of cases, reference computations, deterministic grader, trace logging. No performance claims.
+- **Phase 1 — Generated-SQL baseline (Arm A).** One model, four scenario families, multiple phrasings and trials; includes novel out-of-coverage questions.
+- **Phase 2 — Architecture comparison.** Add approved-tool (Arm B) and hybrid (Arm C) arms on the same cases; paired evaluation. Covered and out-of-coverage questions are reported separately.
+- **Phase 3 — Cross-model comparison.** Extend to the four candidate models once evaluation contracts and scoring are stable.
 
-Next: one injected-revenue-discrepancy investigation with a hidden defect manifest and verified impact; inspect hypotheses, queries and findings. No real personal/customer data or real WhatsApp integration.
+Early comparisons are descriptive: four scenario families are four independent cases, so they cannot rank architectures or qualify trust. See `docs/decisions.md` (Amendment 001) for the rationale and the alternatives considered. The earlier four-model, two-context, one-case matrix is superseded.
+
+Later: one injected-revenue-discrepancy investigation with a hidden defect manifest and verified impact. No real personal/customer data or real WhatsApp integration.
 
 ## Repo documentation
 
@@ -51,14 +71,14 @@ Next: one injected-revenue-discrepancy investigation with a hidden defect manife
 - [`docs/model-selection.md`](docs/model-selection.md) — four candidates, stable IDs, hosts, output/tool protocols and selection controls.
 - [`docs/cost-methodology.md`](docs/cost-methodology.md) — run cost, caching, review time, uncertainty and Pareto/gate-first comparisons.
 - [`docs/decisions.md`](docs/decisions.md) — agreed choices versus open architecture decisions.
-- [`benchmarks/case-001-spec.md`](benchmarks/case-001-spec.md) — proposed first calibration case and ground-truth contract.
-- [`config/tier-policy.example.yaml`](config/tier-policy.example.yaml) — **illustrative policy, not approved certification thresholds**.
+- [`benchmarks/case-001-spec.md`](benchmarks/case-001-spec.md) — net-billed-revenue calibration specification (deferred; not the current first benchmark). Not to be confused with `case_001`-`case_004` in the code, which are conversion fixtures.
+- ``config/tier-policy.example.yaml`` (planned; not yet in repository) — **illustrative policy, not approved certification thresholds**.
 
 ## Research transparency
 
 The author directs the analytical problem design, business definitions, benchmark traps, interpretation and methodological decisions, informed by professional analytics experience. AI assistants may help draft documentation or code, potentially including assistants from providers evaluated here. Their roles will be disclosed in published research. Deterministic or independently verified reference answers, masked human rubric grading where needed, controlled inputs and versioned experiments reduce—but do not eliminate—bias.
 
-This repository currently contains **design documents only**; no experiments have been run, performance claims established, code implemented, costs incurred or production certifications issued by this repository.
+This repository contains design documents and Phase 0 calibration code (Build 001). No model experiments have been run, no performance claims are established, no costs have been measured, and no production certifications have been issued.
 
 ## Later, independent product
 
