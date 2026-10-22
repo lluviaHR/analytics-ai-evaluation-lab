@@ -1,9 +1,10 @@
 import hashlib
 from pathlib import Path
 import numpy as np
+import pandas as pd
 import pytest
 from evaluation_lab.generator import generate_case, canonical_csv_bytes, export_all
-from evaluation_lab.reference import references, decompose, summarize_pandas
+from evaluation_lab.reference import references, decompose, summarize_pandas, summarize_sql
 from evaluation_lab.scenarios import SCENARIOS, SEGMENTS, PERIODS
 
 EXPECTED = [
@@ -61,3 +62,39 @@ def test_sampled_references_from_realized_data():
 def test_invalid_mode_and_too_small_denominator():
     with pytest.raises(ValueError):generate_case(SCENARIOS[0],mode="bogus")
     with pytest.raises(ValueError):generate_case(SCENARIOS[0],n_per_period=0)
+
+
+@pytest.mark.parametrize("engine", ["sqlite", "duckdb"])
+def test_sql_summary_matches_pandas(engine):
+    if engine == "duckdb":
+        pytest.importorskip("duckdb")
+    df = generate_case(SCENARIOS[0])
+    expected = summarize_pandas(df).sort_values(["period", "segment"]).reset_index(drop=True)
+    actual = summarize_sql(df, engine=engine).sort_values(["period", "segment"]).reset_index(drop=True)
+    for field in ("eligible", "conversions"):
+        assert actual[field].tolist() == expected[field].tolist()
+    assert actual[["period", "segment"]].values.tolist() == expected[["period", "segment"]].values.tolist()
+
+
+def test_decompose_rejects_missing_segment_and_zero_denominator():
+    summary = summarize_pandas(generate_case(SCENARIOS[0]))
+    missing = summary.loc[~((summary.period == "2026-08") & (summary.segment == "Enterprise"))]
+    with pytest.raises(ValueError, match="positive denominator"):
+        decompose(missing)
+    zeroed = summary.copy()
+    zeroed.loc[(zeroed.period == "2026-09") & (zeroed.segment == "SMB"), "eligible"] = 0
+    with pytest.raises(ValueError, match="positive denominator"):
+        decompose(zeroed)
+
+
+def test_public_schema_and_paths_do_not_disclose_ground_truth(tmp_path):
+    export_all(tmp_path)
+    expected_columns = ["trial_id", "customer_id", "period", "segment", "converted"]
+    for public_path in (tmp_path / "public").glob("*.csv"):
+        assert public_path.name.startswith("case_")
+        assert "pure" not in public_path.name and "within" not in public_path.name
+        df = pd.read_csv(public_path)
+        assert list(df.columns) == expected_columns
+        for col in df.columns:
+            assert not any(term in col.lower() for term in ("ground_truth", "scenario", "expected", "mix_effect"))
+    # This protects only the exported data package; public source code is NOT secret.
