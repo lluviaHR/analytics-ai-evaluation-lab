@@ -11,6 +11,7 @@ dependencies = ["numpy>=1.24", "pandas>=2.0", "duckdb>=1.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
+eval = ["inspect-ai==0.3.287"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
