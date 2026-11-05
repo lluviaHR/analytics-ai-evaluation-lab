@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-import multiprocessing as mp
-import queue
+import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -125,25 +125,37 @@ def execute_and_record(
     if not (0 < max_rows <= 1000):
         raise ValueError("max_rows must be in 1..1000.")
 
-    ctx = mp.get_context("spawn")
-    output = ctx.Queue(maxsize=1)
-    process = ctx.Process(target=_worker, args=(str(csv_path), sql, output, max_rows))
     started = time.monotonic()
-    process.start()
-    process.join(timeout_seconds)
-    if process.is_alive():
-        process.terminate()
-        process.join(2)
-        if process.is_alive():
-            process.kill()
-            process.join()
-        raise QueryExecutionError("Query timed out.")
+
     try:
-        status, payload = output.get(timeout=1)
-    except queue.Empty as exc:
-        raise QueryExecutionError("Query worker exited without a result.") from exc
-    finally:
-        output.close()
+        completed = subprocess.run(
+            [sys.executable, "-m", "evaluation_lab.sql_worker"],
+            input=json.dumps({
+                "csv_path": str(csv_path),
+                "sql": sql,
+                "max_rows": max_rows,
+            }),
+            text=True,
+            capture_output=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise QueryExecutionError("Query timed out.") from exc
+
+    if completed.returncode != 0:
+        raise QueryExecutionError(
+            f"Query worker exited with code {completed.returncode}: "
+            f"{completed.stderr[-500:]}"
+        )
+
+    try:
+        status, payload = json.loads(completed.stdout)
+    except (ValueError, TypeError) as exc:
+        raise QueryExecutionError(
+            "Query worker returned an invalid response."
+        ) from exc
+
     if status != "ok":
         raise QueryExecutionError(str(payload))
 
