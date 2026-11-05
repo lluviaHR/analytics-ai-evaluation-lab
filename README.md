@@ -6,8 +6,8 @@ Companies are starting to ask AI tools questions about their data, like *“Why 
 
 **Analytics AI Evaluation Lab is a public research and engineering project testing whether AI-generated analytical answers are accurate, consistent, and backed by verifiable evidence.**
 
-**Status:** Phase 0 — building and validating the evaluation setup. No AI models have been scored yet.  
-**Next:** Complete the reference and DuckDB checks, build the deterministic grader, then run the first generated-SQL baseline.  
+**Status:** Phase 0 — Build 001 benchmark generation and numerical reference validation completed locally on November 5, 2026. No AI models have been scored yet.  
+**Next:** Integrate and calibrate the Build 002 deterministic grader, choose evaluation infrastructure, and prepare the first safely executed generated-SQL baseline.  
 **License:** All rights reserved. No open-source license has been granted at this time.
 
 ## The first question I'm testing
@@ -19,6 +19,19 @@ Imagine a SaaS company's trial-to-paid conversion rate increases. Did more trial
 These distinctions guide what a team investigates next, though they do not by themselves establish *what caused* the change.
 
 I create **synthetic datasets (made-up but realistic data)** with deliberately planted patterns and independently calculated answers. That lets me check whether an AI identifies and quantifies the patterns correctly, supports its conclusions, and produces consistent answers.
+
+## Verified benchmark results — Build 001
+
+**Locally validated November 5, 2026.** The generator produced four exact synthetic datasets of 40,000 trial records each (20,000 per period; **160,000 records total**), with a fixed seed and SHA-256 hashes recorded in a private manifest. Conversion calculations were run directly against the generated CSVs using DuckDB; the symmetric Kitagawa decomposition reconciled to each observed change. All **16 automated Build 001 tests passed** on the author's Mac (Python 3.11.17; DuckDB 2.0.0; pandas 3.1.0).
+
+| Controlled scenario | Overall conversion change | Customer-mix contribution | Within-segment contribution |
+|---|---:|---:|---:|
+| Pure mix shift | +1.50 pp | +1.50 pp | 0.00 pp |
+| Within-segment improvement | +1.30 pp | 0.00 pp | +1.30 pp |
+| Combined change | +2.60 pp | +1.40 pp | +1.20 pp |
+| No change | 0.00 pp | 0.00 pp | 0.00 pp |
+
+**Why this matters:** The overall metric can improve solely because a larger share of trials comes from higher-converting segments—not because conversion performance improved within any segment. This is an accounting decomposition, **not causal attribution**. These are deliberately controlled exact-fixture results, not statistical evidence of a real-world change or an AI model evaluation.
 
 ## What I'm comparing
 
@@ -111,24 +124,30 @@ Later: one injected-revenue-discrepancy investigation with a hidden defect manif
 
 The author directs the analytical problem design, business definitions, benchmark traps, interpretation and methodological decisions, informed by professional analytics experience. AI assistants may help draft documentation or code, potentially including assistants from providers evaluated here. Their roles will be disclosed in published research. Deterministic or independently verified reference answers, masked human rubric grading where needed, controlled inputs and versioned experiments reduce—but do not eliminate—bias.
 
-This repository contains design documents and Phase 0 calibration code (Build 001). No model experiments have been run, no performance claims are established, no costs have been measured, and no production certifications have been issued.
+This repository contains design documents and Phase 0 calibration code (Build 001). The Build 001 numerical benchmark was validated locally on November 5, 2026. A Build 002 grader and challenge suite have been prepared separately, but are not yet verified as integrated into this repository. No model experiments have been run, no performance claims are established, no costs have been measured, and no production certifications have been issued.
 
 ## Later, independent product
 
 **Negocio Inteligente** is a separate Spanish-first AI/data readiness and operational analytics concept for microbusinesses in Mexico and Latin America. It may reuse carefully separated adapters, telemetry and evaluation interfaces, but must not share this product's business-specific logic or become a single monolithic application.
 
 
-## Implementation status — Build 001 (21 October 2026)
+## Implementation status — Build 001 (validated November 5, 2026)
 
-The row-level synthetic conversion generator and two reference-calculation paths now exist under `src/evaluation_lab/`; see [conversion benchmark documentation](benchmarks/conversion/README.md). This is **instrument calibration only**, not a scored AI study. Initial Python/SQLite tests were executed; DuckDB verification is pending in an environment where DuckDB can be installed. See the verification note below. Previous pre-implementation statements in older design documents are historical snapshots.
+The row-level synthetic conversion generator and reference-calculation paths live under `src/evaluation_lab/`; see the [conversion benchmark documentation](benchmarks/conversion/README.md). The author ran all 16 Build 001 tests successfully on macOS and generated the four exact benchmark CSVs. DuckDB queries against those generated CSVs confirmed segment conversion rates; a separate DuckDB-aggregation/pandas-decomposition run confirmed that mix and within contributions reconcile for all four cases. Earlier documentation stating DuckDB validation was pending is superseded by this result.
+
+To reproduce the core checks in an environment with the declared dependencies:
 
 ```bash
 python -m pip install -e '.[dev]'
-python -m evaluation_lab.generator --output data/generated/exact --mode exact
-pytest -q
+python -m pytest -v -rs
+python -m evaluation_lab.generator \
+  --output /tmp/analytics-ai-lab-demo \
+  --seed 20261021 \
+  --n-per-period 20000 \
+  --mode exact
 ```
 
-The exact expected ground truth and case-to-scenario mapping must remain inaccessible to evaluated agents.
+The generator writes CSVs under `public/` and an integrity manifest under `private/`. **Do not expose hidden ground truth, scenario labels, or private evaluation materials to the AI system under test.** Keep generated files out of the repository unless deliberately prepared for publication. Read-only SQL execution controls and the Build 002 scorer still require separate integration and validation before a scored AI run.
 
 ## License
 
